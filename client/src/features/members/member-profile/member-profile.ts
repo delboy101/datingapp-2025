@@ -61,6 +61,13 @@ export class MemberProfile implements OnInit, OnDestroy {
         ) {
           currentUser.displayName = updatedMember.displayName;
           this.accountService.setCurrentUser(currentUser);
+          this.memberService.member.update(
+            (member) =>
+              ({
+                ...member,
+                displayName: updatedMember.displayName,
+              } as Member)
+          );
         }
 
         this.toast.success('Profile updated successfully');
