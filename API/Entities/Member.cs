@@ -17,10 +17,15 @@ public class Member
     public required string Country { get; set; }
 
     [JsonIgnore]
+    public List<MemberLike> LikedByMembers { get; set; } = [];
+
+    [JsonIgnore]
+    public List<MemberLike> LikedMembers { get; set; } = [];
+
+    [JsonIgnore]
     public List<Photo> Photos { get; set; } = [];
 
     [ForeignKey(nameof(Id))]
     [JsonIgnore]
     public AppUser User { get; set; } = null!;
-
 }

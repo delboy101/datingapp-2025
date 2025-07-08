@@ -5,7 +5,6 @@ import { MemberCard } from '../member-card/member-card';
 import { PaginatedResult } from '../../../Types/pagination';
 import { Paginator } from '../../../shared/paginator/paginator';
 import { FilterModal } from '../filter-modal/filter-modal';
-import { MemberProfile } from '../member-profile/member-profile';
 
 @Component({
   selector: 'app-member-list',
@@ -26,7 +25,7 @@ export class MemberList implements OnInit {
 
     if (filters) {
       this.memberParams = JSON.parse(filters);
-      this.updatedParams = { ...this.memberParams };
+      this.updatedParams = JSON.parse(filters);
     }
   }
 
