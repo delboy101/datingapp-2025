@@ -28,4 +28,10 @@ public class Member
     [ForeignKey(nameof(Id))]
     [JsonIgnore]
     public AppUser User { get; set; } = null!;
+
+    [JsonIgnore]
+    public List<Message> MessagesSent { get; set; } = [];
+
+    [JsonIgnore]
+    public List<Message> MessagesReceived { get; set; } = [];
 }
