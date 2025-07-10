@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -25,5 +26,12 @@ public class BuggyController : BaseApiController
     public IActionResult GetServerError()
     {
         throw new Exception("This is a server error");
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("admin-secret")]
+    public ActionResult<string> GetSecretAdmin()
+    {
+        return Ok("Only admins should see this");
     }
 }
