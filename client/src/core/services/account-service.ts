@@ -4,6 +4,7 @@ import { LoginCreds, RegisterCreds, User } from '../../Types/user';
 import { tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { LikesService } from './likes-service';
+import { PresenceService } from './presence-service';
 
 @Injectable({
   providedIn: 'root',
@@ -11,6 +12,7 @@ import { LikesService } from './likes-service';
 export class AccountService {
   private http = inject(HttpClient);
   private likesService = inject(LikesService);
+  private presenceService = inject(PresenceService);
   private baseUrl = environment.apiUrl;
 
   currentUser = signal<User | null>(null);
@@ -49,12 +51,17 @@ export class AccountService {
     localStorage.removeItem('filters');
     this.currentUser.set(null);
     this.likesService.clearLikeIds();
+    this.presenceService.stopHubConnection();
   }
 
   setCurrentUser(user: User) {
     user.roles = this.getRolesFromToken(user);
     this.currentUser.set(user);
     this.likesService.getLikeIds();
+
+    if (!this.presenceService.isConnected()) {
+      this.presenceService.createHubConnection(user);
+    }
   }
 
   refreshToken() {

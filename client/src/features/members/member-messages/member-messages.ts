@@ -3,6 +3,7 @@ import {
   effect,
   ElementRef,
   inject,
+  OnDestroy,
   OnInit,
   signal,
   ViewChild,
@@ -13,6 +14,8 @@ import { Message } from '../../../Types/message';
 import { DatePipe } from '@angular/common';
 import { TimeAgoPipe } from '../../../core/pipes/time-ago-pipe';
 import { FormsModule } from '@angular/forms';
+import { PresenceService } from '../../../core/services/presence-service';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-member-messages',
@@ -20,42 +23,40 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './member-messages.html',
   styleUrl: './member-messages.css',
 })
-export class MemberMessages implements OnInit {
+export class MemberMessages implements OnInit, OnDestroy {
   @ViewChild('messageEndRef') messageEndRef!: ElementRef;
   private memberService = inject(MemberService);
-  private messageService = inject(MessageService);
+  protected messageService = inject(MessageService);
+  private route = inject(ActivatedRoute);
+  protected presenceService = inject(PresenceService);
 
-  protected messages = signal<Message[]>([]);
   protected messageContent = '';
 
   constructor() {
     effect(() => {
-      const currentMessages = this.messages();
+      const currentMessages = this.messageService.messageThread();
 
       if (currentMessages.length > 0) {
         this.scrollToBottom();
       }
     });
   }
-
-  ngOnInit(): void {
-    this.loadMessages();
+  ngOnDestroy(): void {
+    this.messageService.stopHubConnection();
   }
 
-  loadMessages() {
-    const memberId = this.memberService.member()?.id;
+  ngOnInit(): void {
+    this.route.parent?.paramMap.subscribe({
+      next: (params) => {
+        const otherUserId = params.get('id');
 
-    if (memberId) {
-      this.messageService.getMessageThread(memberId).subscribe({
-        next: (messages) =>
-          this.messages.set(
-            messages.map((message) => ({
-              ...message,
-              currentUserSender: message.senderId !== memberId,
-            }))
-          ),
-      });
-    }
+        if (!otherUserId) {
+          throw new Error('Cannot connect to hub');
+        }
+
+        this.messageService.createHubConnection(otherUserId);
+      },
+    });
   }
 
   sendMessage() {
@@ -65,15 +66,8 @@ export class MemberMessages implements OnInit {
 
     this.messageService
       .sendMessage(recipientId, this.messageContent)
-      .subscribe({
-        next: (message) => {
-          this.messages.update((messages) => {
-            message.currentUserSender = true;
-            return [...messages, message];
-          });
-          this.messageContent = '';
-        },
-        complete: () => this.scrollToBottom(),
+      ?.then(() => {
+        this.messageContent = '';
       });
   }
 
