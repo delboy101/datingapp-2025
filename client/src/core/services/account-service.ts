@@ -14,6 +14,7 @@ export class AccountService {
   private likesService = inject(LikesService);
   private presenceService = inject(PresenceService);
   private baseUrl = environment.apiUrl;
+  private interval: number = 0;
 
   currentUser = signal<User | null>(null);
 
@@ -56,6 +57,7 @@ export class AccountService {
           this.currentUser.set(null);
           this.likesService.clearLikeIds();
           this.presenceService.stopHubConnection();
+          this.stopTokenRefreshInterval();
         },
       });
   }
@@ -79,7 +81,7 @@ export class AccountService {
   }
 
   startTokenRefreshInterval() {
-    setInterval(() => {
+    this.interval = setInterval(() => {
       this.http
         .post<User>(
           this.baseUrl + 'account/refresh-token',
@@ -95,6 +97,10 @@ export class AccountService {
           },
         });
     }, 5 * 60 * 1000);
+  }
+
+  stopTokenRefreshInterval() {
+    clearInterval(this.interval);
   }
 
   private getRolesFromToken(user: User): string[] {
