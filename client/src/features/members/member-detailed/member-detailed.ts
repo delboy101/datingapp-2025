@@ -12,6 +12,7 @@ import { AgePipe } from '../../../core/pipes/age-pipe';
 import { AccountService } from '../../../core/services/account-service';
 import { MemberService } from '../../../core/services/member-service';
 import { PresenceService } from '../../../core/services/presence-service';
+import { LikesService } from '../../../core/services/likes-service';
 
 @Component({
   selector: 'app-member-detailed',
@@ -25,14 +26,23 @@ export class MemberDetailed implements OnInit {
   private accountService = inject(AccountService);
   protected memberService = inject(MemberService);
   protected presenceService = inject(PresenceService);
+  protected likesService = inject(LikesService);
+  private routeId = signal<string | null>(null);
+
+  constructor() {
+    this.route.paramMap.subscribe((params) => {
+      this.routeId.set(params.get('id'));
+    });
+  }
+
+  protected hasLiked = computed(() =>
+    this.likesService.hasLiked(this.routeId()!)
+  );
 
   protected title = signal<string | undefined>('');
 
   protected isCurrentUser = computed(() => {
-    return (
-      this.accountService.currentUser()?.id ===
-      this.route.snapshot.paramMap.get('id')
-    );
+    return this.accountService.currentUser()?.id === this.routeId();
   });
 
   ngOnInit(): void {

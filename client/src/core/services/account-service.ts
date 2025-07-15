@@ -48,10 +48,16 @@ export class AccountService {
   }
 
   logout() {
-    localStorage.removeItem('filters');
-    this.currentUser.set(null);
-    this.likesService.clearLikeIds();
-    this.presenceService.stopHubConnection();
+    this.http
+      .post(this.baseUrl + 'account/logout', {}, { withCredentials: true })
+      .subscribe({
+        next: () => {
+          localStorage.removeItem('filters');
+          this.currentUser.set(null);
+          this.likesService.clearLikeIds();
+          this.presenceService.stopHubConnection();
+        },
+      });
   }
 
   setCurrentUser(user: User) {
