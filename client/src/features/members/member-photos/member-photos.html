@@ -10,7 +10,7 @@
       [class.opacity-30]="!photo.isApproved"
     />
     @if (!photo.isApproved) {
-    <div class="absolute bottom-2 left-2 badge badge-outline badge-error">
+    <div class="absolute bottom-2 self-center badge badge-outline badge-error">
       Awaiting approval
     </div>
     } @if (accountService.currentUser()?.id === memberService.member()?.id) {
