@@ -77,7 +77,8 @@ namespace API.Controllers
             {
                 Url = result.SecureUrl.AbsoluteUri,
                 PublicId = result.PublicId,
-                MemberId = memberId
+                MemberId = memberId,
+                IsApproved = true
             };
 
             member.Photos.Add(photo);
